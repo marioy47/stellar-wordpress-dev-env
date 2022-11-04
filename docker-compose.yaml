@@ -10,8 +10,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-wordpress}
       MYSQL_USER: ${MYSQL_USER:-wordpress}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
-    ports:
-      - ${MYSQL_PORT}:3306
     volumes:
       - db-data:/var/lib/mysql
 
@@ -26,6 +24,17 @@ services:
     container_name: stellar-dev-mail
     ports:
       - ${MAIL_PORT:-8001}:8025
+
+  # PhpMyAdmin
+  pma:
+    image: phpmyadmin
+    container_name: stellar-dev-pma
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_USER: ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+    ports:
+      - ${PMA_PORT:-8002}:80
 
   # WordPress Application
   wp:
@@ -55,45 +64,35 @@ services:
       # WordPress files
       - wp-data:/var/www/html
       - ./plugins:/var/www/html/wp-content/plugins
-
-  # PhpMyAdmin
-  pma:
-    image: phpmyadmin
-    container_name: stellar-dev-pma
-    environment:
-      PMA___HOST: stellar-dev-db
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_USER: ${MYSQL_USER:-wordpress}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
     ports:
-      - ${PMA_PORT:-8002}:80
+      - ${WORDPRESS_PORT:-8000}:80
 
   # Generate SSL certs for the local development environment.
+  # (Here for future use. Right now is not usable)
   mkcert:
     build: ./docker/mkcert
     container_name: stellar-dev-mkcert
     volumes:
       - cert-data:/root/.local/share/mkcert
-    command: mkcert -cert-file "${WORDPRESS_HOST:-stellar.local}.crt" -key-file "${WORDPRESS_HOST:-stellar.local}.key" "${WORDPRESS_HOST:-stellar.local}" "*.${DEV_URL:-stellar.local}"
+    command: mkcert -cert-file "stellar-dev-proxy.crt" -key-file "stellar-dev-proxy.key" "stellar-dev-proxy" "*.stellar-dev-proxy"
 
   # Nginx proxy to support SSL Certificates ane remote media redirect
+  # TODO: share the /var/www/html/wp-content folder with the `wp` image)
   proxy:
     image: nginx:alpine
     container_name: stellar-dev-proxy
     environment:
-      WORDPRESS_HOST: stellar-dev-wp
-      WORDPRESS_PROD_URL: ${WORDPRESS_PROD_URL:-https://remote-site-media}
+      WORDPRESS_CONTAINER: stellar-dev-wp
+      WORDPRESS_REMOTE_URL: ${WORDPRESS_REMOTE_URL:-https://remote-site-media}
     volumes_from:
       - mkcert
     volumes:
       - ./docker/proxy/nginx-templates:/etc/nginx/templates:ro
-    ports:
-      - ${WORDPRESS_PORT:-8000}:80
     command:
       - sh
       - -c
       - |
-        envsubst '$$WORDPRESS_HOST,$$WORDPRESS_PROD_URL' < /etc/nginx/templates/wordpress.conf > /etc/nginx/conf.d/wordpress.conf
+        envsubst '$$WORDPRESS_CONTAINER,$$WORDPRESS_REMOTE_URL' < /etc/nginx/templates/wordpress.conf > /etc/nginx/conf.d/wordpress.conf
         rm -f /etc/nginx/conf.d/default.conf
         nginx -g 'daemon off;'
 
@@ -122,7 +121,7 @@ services:
       - -c
       - |
         sleep 10
-        wp core install --path=/var/www/html --title=LD_DEV --admin_user=$${WORDPRESS_ADMIN_USER} --admin_password=$${WORDPRESS_ADMIN_PASS} --admin_email=admin@example.com --skip-email --url="http://$${WORDPRESS_HOST}:$${WORDPRESS_PORT}"
+        wp core install --path=/var/www/html --title=StellarWpDev --admin_user=$${WORDPRESS_ADMIN_USER} --admin_password=$${WORDPRESS_ADMIN_PASS} --admin_email=admin@example.com --skip-email --url="$${WORDPRESS_HOST}:$${WORDPRESS_PORT}"
         wp plugin install redis-cache --activate
         wp redis enable
         echo "Go to http://$${WORDPRESS_HOST}:$${WORDPRESS_PORT}/wp-admin/ with User $${WORDPRESS_ADMIN_USER} and password $${WORDPRESS_ADMIN_PASS}"
@@ -135,3 +134,5 @@ volumes:
   db-data:
   wp-data:
   cert-data:
+
+# vim: wrap
