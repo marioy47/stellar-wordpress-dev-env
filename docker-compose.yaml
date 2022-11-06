@@ -12,6 +12,7 @@ services:
     volumes:
       - ./docker/http/nginx-templates:/etc/nginx/templates:ro
       - wp-data:/var/www/html
+      - cert-data:/root/.local/share/mkcert
     command:
       - sh
       - -c
@@ -21,6 +22,8 @@ services:
         nginx -g 'daemon off;'
     ports:
       - ${WORDPRESS_PORT:-8000}:80
+    depends_on:
+      - mkcert
 
   # WordPress Application
   wp:
@@ -62,6 +65,15 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
     volumes:
       - db-data:/var/lib/mysql
+
+  # Generate SSL certs for the local development environment.
+  mkcert:
+    build: ./docker/mkcert
+    container_name: stellar-dev-mkcert
+    volumes:
+      - cert-data:/root/.local/share/mkcert
+    command: mkcert -cert-file "stellar-dev-http.crt" -key-file "stellar-dev-http.key" "stellar-dev-http" "*.stellar-dev-http"
+      #Use same name as the nginx congtainer_name
 
 networks:
   default:
