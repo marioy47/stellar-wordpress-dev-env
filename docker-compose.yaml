@@ -11,7 +11,7 @@ services:
       WORDPRESS_CONTAINER: stellar-dev-wp
     volumes:
       - ./docker/http/nginx-templates:/etc/nginx/templates:ro
-      - ./:/var/www/html
+      - wp-data:/var/www/html
     command:
       - sh
       - -c
@@ -48,13 +48,24 @@ services:
       - ./logs/xdebug:/tmp/xdebug
       - ./logs/wordpress:/tmp/wordpress
       # WordPress files
-      - ./:/var/www/html
+      - wp-data:/var/www/html
       - ./plugins:/var/www/html/wp-content/plugins
 
+  # MariaDB database
+  db:
+    image: mariadb
+    container_name: stellar-dev-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wordpress}
+      MYSQL_USER: ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+    volumes:
+      - db-data:/var/lib/mysql
 
 networks:
   default:
-    name: learndash-wp-proxy-network
+    name: stellar-dev-network
 
 volumes:
   db-data:
