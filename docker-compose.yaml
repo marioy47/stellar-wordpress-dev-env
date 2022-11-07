@@ -110,6 +110,24 @@ services:
     image: redis:alpine
     container_name: stellar-dev-cache
 
+  # MailHog mail catcher
+  mail:
+    image: mailhog/mailhog
+    container_name: stellar-dev-mail
+    ports:
+      - ${MAIL_PORT:-8002}:8025
+
+  # PhpMyAdmin
+  pma:
+    image: phpmyadmin
+    container_name: stellar-dev-pma
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_USER: ${MYSQL_USER:-wordpress}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+    ports:
+      - ${PMA_PORT:-8003}:80
+
 networks:
   default:
     name: stellar-dev-network
