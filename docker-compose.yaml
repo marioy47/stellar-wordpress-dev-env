@@ -8,15 +8,26 @@ services:
     container_name: stellar-dev-mkcert
     volumes:
       - cert-data:/root/.local/share/mkcert
-    command: mkcert -cert-file "stellar-dev-webserver.crt" -key-file "stellar-dev-webserver.key" "stellar-dev-webserver" "*.stellar-dev-webserver"
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -f "stellar-dev-webserver.crt" ]; then
+          mkcert -cert-file "stellar-dev-webserver.crt" -key-file "stellar-dev-webserver.key" "${WORDPRESS_HOST:-stellar.local}" "*.${WORDPRESS_HOST:-stellar.local}" localhost 127.0.0.1
+        fi
 
-  # Nginx Webserver and proxy
+  # Nginx Webserver and proxy for PhpMyAdmin and MailHog
   webserver:
     image: nginx:alpine
     container_name: stellar-dev-webserver
     environment:
-      WORDPRESS_REMOTE_URL: ${WORDPRESS_REMOTE_URL:-https://stellarwp.com}
+      WORDPRESS_HOST: ${WORDPRESS_HOST:-stellar.local}
+      PMA_HOST: pma.${WORDPRESS_HOST:-stellar.local}
+      MAIL_HOST: mail.${WORDPRESS_HOST:-stellar.local}
+      WORDPRESS_REMOTE_URL: ${WORDPRESS_REMOTE_URL:-https://user-env-file-to-overload-this-url.com}
       WORDPRESS_CONTAINER: stellar-dev-wp
+      PMA_CONTAINER: stellar-dev-pma
+      MAIL_CONTAINER: stellar-dev-mail
     volumes:
       - ./docker/webserver/nginx-templates:/etc/nginx/templates:ro
       - wp-data:/var/www/html
@@ -25,12 +36,14 @@ services:
       - sh
       - -c
       - |
-        envsubst '$$WORDPRESS_CONTAINER,$$WORDPRESS_REMOTE_URL' < /etc/nginx/templates/wordpress.conf > /etc/nginx/conf.d/wordpress.conf
+        sleep 2
+        envsubst '$$WORDPRESS_HOST,$$WORDPRESS_CONTAINER,$$WORDPRESS_REMOTE_URL' < /etc/nginx/templates/wordpress.conf > /etc/nginx/conf.d/wordpress.conf
+        envsubst '$$PMA_HOST' < /etc/nginx/templates/pma.conf > /etc/nginx/conf.d/pma.conf
+        envsubst '$$MAIL_HOST' < /etc/nginx/templates/mail.conf > /etc/nginx/conf.d/mail.conf
         rm -f /etc/nginx/conf.d/default.conf
         nginx -g 'daemon off;'
     ports:
-      - ${WORDPRESS_PORT_HTTP:-8000}:80
-      - ${WORDPRESS_PORT_HTTPS:-8001}:443
+      - ${WORDPRESS_PORT_HTTPS:-8443}:443
     depends_on:
       - mkcert
 
@@ -75,13 +88,13 @@ services:
     volumes:
       - db-data:/var/lib/mysql
 
-  # WordPress installation
+  # Install WP with wp-cli
   wp-cli:
     image: wordpress:cli
     container_name: stellar-dev-cli
     environment:
-      WORDPRESS_HOST: ${WORDPRESS_HOST:-localhost} # To pass to wp-cli
-      WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-8001}
+      WORDPRESS_HOST: ${WORDPRESS_HOST:-stellar.local} # To pass to wp-cli
+      WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-8443}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
       WORDPRESS_ADMIN_PASS: ${WORDPRESS_ADMIN_PASS:-password}
       WORDPRESS_DB_HOST: stellar-dev-db
@@ -114,8 +127,6 @@ services:
   mail:
     image: mailhog/mailhog
     container_name: stellar-dev-mail
-    ports:
-      - ${MAIL_PORT:-8002}:8025
 
   # PhpMyAdmin
   pma:
@@ -125,8 +136,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_USER: ${MYSQL_USER:-wordpress}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
-    ports:
-      - ${PMA_PORT:-8003}:80
 
 networks:
   default:
