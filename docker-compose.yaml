@@ -13,7 +13,7 @@ services:
       - -c
       - |
         if [ ! -f "stellar-dev-webserver.crt" ]; then
-          mkcert -cert-file "stellar-dev-webserver.crt" -key-file "stellar-dev-webserver.key" "${WORDPRESS_HOST:-stellar.local}" "*.${WORDPRESS_HOST:-stellar.local}" localhost 127.0.0.1
+          mkcert -cert-file "stellar-dev-webserver.crt" -key-file "stellar-dev-webserver.key" "${WORDPRESS_HOST:-localhost}" "*.${WORDPRESS_HOST:-localhost}" localhost 127.0.0.1
         fi
 
   # Nginx Webserver and proxy for PhpMyAdmin and MailHog
@@ -21,9 +21,9 @@ services:
     image: nginx:alpine
     container_name: stellar-dev-webserver
     environment:
-      WORDPRESS_HOST: ${WORDPRESS_HOST:-stellar.local}
-      PMA_HOST: pma.${WORDPRESS_HOST:-stellar.local}
-      MAIL_HOST: mail.${WORDPRESS_HOST:-stellar.local}
+      WORDPRESS_HOST: ${WORDPRESS_HOST:-localhost}
+      PMA_HOST: pma.${WORDPRESS_HOST:-localhost}
+      MAIL_HOST: mail.${WORDPRESS_HOST:-localhost}
       WORDPRESS_REMOTE_URL: ${WORDPRESS_REMOTE_URL:-https://user-env-file-to-overload-this-url.com}
       WORDPRESS_CONTAINER: stellar-dev-wp
       PMA_CONTAINER: stellar-dev-pma
@@ -43,7 +43,7 @@ services:
         rm -f /etc/nginx/conf.d/default.conf
         nginx -g 'daemon off;'
     ports:
-      - ${WORDPRESS_PORT_HTTPS:-8443}:443
+      - ${WORDPRESS_PORT_HTTPS:-443}:443
     depends_on:
       - mkcert
 
@@ -75,6 +75,8 @@ services:
       # WordPress files
       - wp-data:/var/www/html
       - ./plugins:/var/www/html/wp-content/plugins
+      - ./themes:/var/www/html/wp-content/themes
+      - ./public:/var/www/html/public
 
   # MariaDB database
   db:
@@ -93,8 +95,8 @@ services:
     image: wordpress:cli
     container_name: stellar-dev-cli
     environment:
-      WORDPRESS_HOST: ${WORDPRESS_HOST:-stellar.local} # To pass to wp-cli
-      WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-8443}
+      WORDPRESS_HOST: ${WORDPRESS_HOST:-localhost} # To pass to wp-cli
+      WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-443}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
       WORDPRESS_ADMIN_PASS: ${WORDPRESS_ADMIN_PASS:-password}
       WORDPRESS_DB_HOST: stellar-dev-db

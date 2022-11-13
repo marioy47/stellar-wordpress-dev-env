@@ -1,3 +1,5 @@
-plugins
-logs
 .env
+logs
+plugins
+public
+themes
