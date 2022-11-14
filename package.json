@@ -1,0 +1,23 @@
+{
+  "name": "stellar-wordpress",
+  "version": "1.0.0",
+  "description": "Local WordPress development environment using only **Docker** and optionally Node.",
+  "scripts": {
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "destroy": "docker-compose down -v",
+    "restart": "docker-compose down && docker-compose up -d",
+    "bash": "docker-compose exec --user=33 wp bash"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marioy47/stellar-wordpress-dev-env.git"
+  },
+  "keywords": [],
+  "author": "Mario Yepes<marioy47@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marioy47/stellar-wordpress-dev-env/issues"
+  },
+  "homepage": "https://github.com/marioy47/stellar-wordpress-dev-env#readme"
+}

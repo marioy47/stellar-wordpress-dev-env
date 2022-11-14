@@ -1,21 +1,65 @@
-# WordPress Stellar development Environment
+# Stellar WordPress Development Environment
 
 Local WordPress development environment using only **Docker** and optionally Node.
 
-## Services
+- WordPress with SSL: <https://localhost:8443>
+- MailHog (SMTP testing): <https://mail.localhost:8443>
+- PhpMyAdmin: <https://pma.localhost:8443>
 
-- WordPress with SSL: <https://stellar.local:8443>
-- MailHog (SMTP testing): <http://mail.stellar.local:8443>
-- PhpMyAdmin: <http://pma.stellar.local:8443>
+Notes:
 
-## Usage
+- You can change `localhost` for a custom domain (see below)
+- You can disable SSL (see below)
+- You can change all the ports (see below)
+- You can change the default username and password (see below)
 
-1. Edit your `/etc/hosts` file
-2. Start the environment
+## Setup
 
-### 1. Edit your _hosts_ file adding the `stellar.local` custom domain
+```bash
+git clone https://github.com/marioy47/stellar-wordpress-dev-env stellar-wp
+cd stellar-wp
+docker-compose up -d
+open https://localhost:8443/wp-admin
+```
 
-You have to create a new entry on this file so the development machine understands that the custom domain (in this case `stellar.local`) points to itself.
+- Default username: `admin`
+- Default password: `password`
+
+## Developing
+
+After you startup then environment, you should have 2 new folders:
+
+- `plugins/` with all your plugins
+- `themes/` with all your themes
+
+If you destroy your environment, everything in this folders **will be kept**.
+
+## Destroy the environment
+
+```bash
+docker-compose down -v
+```
+
+The `-v` option will remove the following
+
+- Any database data
+- The WordPress installation
+- Any certificate data
+
+Content on `plgins/` and `themes/` will allways be kept
+
+## Customization
+
+### Change `localhost` for a custom domain
+
+Thigs to note:
+
+- You _should_ use an **invalid** sufix like `.local` or `.devdomain` or `.localdomain` to avoid redirection in your browser
+- You can **not change** the domain of a working environment, you have to destroy it first
+
+#### 1. Change your `hosts` file configuring your new domain
+
+You have to create a new entry on this file so the development machine understands that the custom domain (for instance `stellar.local`) points to itself.
 
 - On MacOS and Linux is `/etc/hosts`
 - On [Windows](https://www.liquidweb.com/kb/edit-host-file-windows-10/) is `C:\Windows\System32\drivers\etc\hosts`
@@ -26,21 +70,48 @@ You need to have an entry similar to the following:
 127.0.0.1 localhost stellar.local mail.stellar.local pma.stellar.local
 ```
 
-> Notice that you can change the domain using a [`.env`](.env.example) file (see below on how to do that)
+#### 2. Change the your `.env` file to point to the new domain
 
-### 2. Start the environment
+In you `.env` add or change the following line:
 
 ```bash
-cd path/to/repo
-docker-compose up mkcert
-docker-compose up -d
+WORDPRESS_HOST=stellar.local
 ```
 
-> Note 1:
-> You can omit the `-d` flag if you want to review the logs on the terminal
+#### 3. (Re)build your environment
 
-> Note 2:
-> The `docker-compose up mkcert` is to create the SSL certs and _minimize_ issues with the Nginx web-service.
+```bash
+docker-compose down -v
+docker-compse up -d
+```
+
+### Disable HTTPS
+
+The SSL certificate used to "secure" the web server is NOT valid since it's created by an _invalid authority_. So if you want to work without SSL you just have to add the following line to your `.env` file:
+
+```bash
+WORDPRESS_DISABLE_HTTPS=yes
+```
+
+And **rebuild** (destroy/recreate) your environment
+
+### Proxy remote media files
+
+There are times where you have a published staging site with hundreds of media files already uploaded, and syncing them locally would take too much time or occupy too much space in your local machine.
+
+You can use the local `nginx` service to proxy those files. That way you would only need to sync the database and not the media. The only requisite is that the media in the local site has the same **path** as the remote site.
+
+For instance, if you have a file in <https://remote-site.com/wp-content/uploads/2022/11/my-image.png> you can access it in <https://localhost:8443/wp-content/uploads/2022/11/my-image.png> **without** the need to download it locally.
+
+> Note that the **path** of the file is the same, but the domain changes. That's a requirement
+
+To make this work, you should create `.env` file with at least the following line:
+
+```bash
+WORDPRESS_REMOTE_URL=https://remote-site.com
+```
+
+This will tell `nginx` to look for the file locally **first**, and if it's not present, then look for that file on the remote site and pass it to the user.
 
 ## Troubleshooting
 
@@ -53,16 +124,4 @@ docker-compose down
 docker-compose up
 ```
 
-## Proxy remote media files
-
-There are times where you have a published staging site with hundreds of media files already uploaded, and syncing them locally would take too much time or occupy too much space in your local machine.
-
-You can use the local `nginx` service to proxy those files. That way you would only need to sync the database and not the media. The only requisite is that the media in the local site has the same **path** as the remote site.
-
-For instance, if you have a file in <https://remote-site.com/wp-content/uploads/2022/11/my-image.png> you can access it in `<https://stellar.local:8443/wp-content/uploads/2022/11/my-image.png> without the need to download it locally.
-
-To make this work, you should create `.env` file with at least the following line:
-
-```bash
-WORDPRESS_REMOTE_URL=https://remote-site.com
-```
+Do **not** pass the `-v` option. We only need to restart the environment, not destoy it.
