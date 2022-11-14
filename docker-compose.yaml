@@ -56,6 +56,7 @@ services:
         - WORDPRESS_VERSION=${WORDPRESS_VERSION:-fpm}
     container_name: stellar-dev-wp
     environment:
+      COMPOSER_HOME: /tmp/composer
       WORDPRESS_DB_HOST: stellar-dev-db
       WORDPRESS_DB_USER: ${MYSQL_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
@@ -99,7 +100,7 @@ services:
       WORDPRESS_HOST: ${WORDPRESS_HOST:-localhost} # To pass to wp-cli
       WORDPRESS_PORT_HTTP: ${WORDPRESS_PORT_HTTP:-8080}
       WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-8443}
-      WORDPRESS_DISABLE_HTTPS: ${WORDPRESS_DISABLE_HTTPS}
+      WORDPRESS_DISABLE_HTTPS: ${WORDPRESS_DISABLE_HTTPS:-}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
       WORDPRESS_ADMIN_PASS: ${WORDPRESS_ADMIN_PASS:-password}
       WORDPRESS_DB_HOST: stellar-dev-db
