@@ -6,6 +6,8 @@ Local WordPress development environment using only **Docker** and optionally Nod
 - MailHog (SMTP testing): <https://mail.localhost:8443>
 - PhpMyAdmin: <https://pma.localhost:8443>
 
+<video src="demo.mp4" width="100%"></video>
+
 Notes:
 
 - You can change `localhost` for a custom domain (see below)

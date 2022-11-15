@@ -8,7 +8,9 @@
     "destroy": "docker-compose down -v",
     "restart": "docker-compose down && docker-compose up -d",
     "bash": "docker-compose exec --user=33 wp bash",
-    "composer": "docker-compose exec --user=33 wp composer"
+    "composer": "docker-compose exec --user=33 wp composer",
+    "log:install": "docker-compose logs wp-cli",
+    "log:web": "docker-compose logs webserver"
   },
   "repository": {
     "type": "git",
