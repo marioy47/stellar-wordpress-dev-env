@@ -2,11 +2,11 @@
 
 Local WordPress development environment using only **Docker** and optionally Node.
 
+<video src="https://user-images.githubusercontent.com/3419025/201969563-ee5f7073-6955-40c5-b766-95824b6be9a1.mp4" width="100%"></video>
+
 - WordPress with SSL: <https://localhost:8443>
 - MailHog (SMTP testing): <https://mail.localhost:8443>
 - PhpMyAdmin: <https://pma.localhost:8443>
-
-<video src="https://user-images.githubusercontent.com/3419025/201969563-ee5f7073-6955-40c5-b766-95824b6be9a1.mp4" width="100%"></video>
 
 Notes:
 
@@ -14,18 +14,23 @@ Notes:
 - You can disable SSL (see below)
 - You can change all the ports (see below)
 - You can change the default username and password (see below)
+- You can change the MyAdmin credentials (see below)
+- You can use _remote media files_ to avoid big sync processes (see below)
 
 ## Setup
 
 ```bash
-git clone https://github.com/marioy47/stellar-wordpress-dev-env stellar-wp
-cd stellar-wp
-docker-compose up -d
+git clone https://github.com/marioy47/stellar-wordpress-dev-env stellar-wordpress
+cd stellar-wordpress
+npm start # or `docker-compose up -d`
 open https://localhost:8443/wp-admin
 ```
 
-- Default username: `admin`
-- Default password: `password`
+- Default WordPress username: `admin`
+- Default WordPress password: `password`
+
+- Default PhpMyAdmin user: `wordpress`
+- Default PhpMyAdmin password: `wordpress`
 
 ## Developing
 
@@ -39,7 +44,7 @@ If you destroy your environment, everything in this folders **will be kept**.
 ## Destroy the environment
 
 ```bash
-docker-compose down -v
+npm run destroy # or `docker-compose down -v`
 ```
 
 The `-v` option will remove the following
