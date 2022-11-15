@@ -30,8 +30,11 @@ services:
       MAIL_CONTAINER: stellar-dev-mail
     volumes:
       - ./docker/webserver/nginx-templates:/etc/nginx/templates:ro
-      - wp-data:/var/www/html
       - cert-data:/root/.local/share/mkcert
+      - wp-data:/var/www/html
+      - ./plugins/:/var/www/html/wp-content/plugins
+      - ./themes:/var/www/html/wp-content/themes
+      - ./public:/var/www/html/public
     command:
       - sh
       - -c
