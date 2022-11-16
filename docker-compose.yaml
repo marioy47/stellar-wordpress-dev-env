@@ -50,6 +50,10 @@ services:
       - ${WORDPRESS_PORT_HTTPS:-8443}:443
     depends_on:
       - mkcert
+    networks:
+      default:
+        aliases:
+          - ${WORDPRESS_HOST:-localhost}
 
   # WordPress Application
   wp:
