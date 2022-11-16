@@ -101,6 +101,7 @@ services:
     container_name: stellar-dev-cli
     environment:
       WORDPRESS_HOST: ${WORDPRESS_HOST:-localhost} # To pass to wp-cli
+      WORDPRESS_MULTISITE: ${WORDPRESS_MULTISITE:-}
       WORDPRESS_PORT_HTTP: ${WORDPRESS_PORT_HTTP:-8080}
       WORDPRESS_PORT_HTTPS: ${WORDPRESS_PORT_HTTPS:-8443}
       WORDPRESS_DISABLE_HTTPS: ${WORDPRESS_DISABLE_HTTPS:-}
@@ -126,7 +127,12 @@ services:
         if [ "$${WORDPRESS_DISABLE_HTTPS}" != "" -a "$${WORDPRESS_DISABLE_HTTPS}" != "0" -a  "$${WORDPRESS_DISABLE_HTTPS}" != "no" ]; then
           URL="http://$${WORDPRESS_HOST}:$${WORDPRESS_PORT_HTTP}"
         fi
-        wp core install --path=/var/www/html --title=StellarDEV --admin_user=$${WORDPRESS_ADMIN_USER} --admin_password=$${WORDPRESS_ADMIN_PASS} --admin_email=admin@example.com --skip-email --url="$$URL"
+        TYPE="install"
+        if [ "$${WORDPRESS_MULTISITE}" == "true" -o "$${WORDPRESS_MULTISITE}" == "1" ]; then
+          TYPE="multisite-install --subdomains"
+          URL="https://$${WORDPRESS_HOST}"
+        fi
+        wp core $${TYPE} --path=/var/www/html --title=StellarDEV --admin_user=$${WORDPRESS_ADMIN_USER} --admin_password=$${WORDPRESS_ADMIN_PASS} --admin_email=admin@example.com --skip-email --url="$$URL"
         wp plugin install redis-cache --activate
         wp redis enable
         echo "Go to $$URL/wp-admin/ with User $${WORDPRESS_ADMIN_USER} and password $${WORDPRESS_ADMIN_PASS}"
