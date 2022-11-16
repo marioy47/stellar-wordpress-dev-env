@@ -4,20 +4,42 @@ Local WordPress development environment using only **Docker** and optionally Nod
 
 <video src="https://user-images.githubusercontent.com/3419025/201969563-ee5f7073-6955-40c5-b766-95824b6be9a1.mp4" width="100%"></video>
 
+<!-- toc -->
+
+- [Features](#features)
+- [Installation/Setup](#installationsetup)
+- [Plugin and Theme Developmet](#plugin-and-theme-developmet)
+- [Destroy the environment](#destroy-the-environment)
+- [Change `localhost` for a custom domain](#change-localhost-for-a-custom-domain)
+  - [1. Change your `hosts` file](#1-change-your-hosts-file)
+  - [2. Change the `.env` file to point to the new domain](#2-change-the-env-file-to-point-to-the-new-domain)
+  - [3. (Re)build your environment](#3-rebuild-your-environment)
+- [Disable HTTPS](#disable-https)
+- [Proxy remote media files](#proxy-remote-media-files)
+- [Creating a multisite](#creating-a-multisite)
+  - [1. Changes in the `.env` file](#1-changes-in-the-env-file)
+  - [2. Change the `hosts` file for **every** domain](#2-change-the-hosts-file-for-every-domain)
+  - [3. (optional) Create network aliases](#3-optional-create-network-aliases)
+- [4. Create the environment with 2 docker files](#4-create-the-environment-with-2-docker-files)
+- [Troubleshooting](#troubleshooting)
+  - [Error connecting to port 8443 (or any conrfigured port)](#error-connecting-to-port-8443-or-any-conrfigured-port)
+
+<!-- tocstop -->
+
+## Features
+
 - WordPress with SSL: <https://localhost:8443>
 - MailHog (SMTP testing): <https://mail.localhost:8443>
 - PhpMyAdmin: <https://pma.localhost:8443>
-
-Notes:
-
 - You can change `localhost` for a custom domain (see below)
 - You can disable SSL (see below)
 - You can change all the ports (see below)
 - You can change the default username and password (see below)
-- You can change the MyAdmin credentials (see below)
-- You can use _remote media files_ to avoid big sync processes (see below)
+- You can change the MySQL connection credentials (see below)
+- You can use _proxy_ remote media files to avoid big sync processes (see below)
+- You can enable multisite
 
-## Setup
+## Installation/Setup
 
 ```bash
 git clone https://github.com/marioy47/stellar-wordpress-dev-env stellar-wordpress
@@ -28,48 +50,41 @@ open https://localhost:8443/wp-admin
 
 - Default WordPress username: `admin`
 - Default WordPress password: `password`
+- Default PhpMyAdmin/MySQL user: `wordpress`
+- Default PhpMyAdmin/MySQL password: `wordpress`
 
-- Default PhpMyAdmin user: `wordpress`
-- Default PhpMyAdmin password: `wordpress`
-
-## Developing
+## Plugin and Theme Developmet
 
 After you startup then environment, you should have 2 new folders:
 
-- `plugins/` with all your plugins
-- `themes/` with all your themes
+- `plugins/` that point to `/var/www/html/wp-content/plugins` of the WordPress container
+- `themes/` that point to `/var/www/html/wp-content/themes` of the WordPress container
 
 If you destroy your environment, everything in this folders **will be kept**.
 
 ## Destroy the environment
 
 ```bash
-npm run destroy # or `docker-compose down -v`
+npm run destroy
 ```
 
-The `-v` option will remove the following
+Content on `plgins/` and `themes/` will allways be **kept**
 
-- Any database data
-- The WordPress installation
-- Any certificate data
+## Change `localhost` for a custom domain
 
-Content on `plgins/` and `themes/` will allways be kept
-
-## Customization
-
-### Change `localhost` for a custom domain
-
-Thigs to note:
+Thigs to note you start:
 
 - You _should_ use an **invalid** sufix like `.local` or `.devdomain` or `.localdomain` to avoid redirection in your browser
 - You can **not change** the domain of a working environment, you have to destroy it first
 
-#### 1. Change your `hosts` file configuring your new domain
+### 1. Change your `hosts` file
 
-You have to create a new entry on this file so the development machine understands that the custom domain (for instance `stellar.local`) points to itself.
+This is the file of your machine, not a file in a container.
 
 - On MacOS and Linux is `/etc/hosts`
 - On [Windows](https://www.liquidweb.com/kb/edit-host-file-windows-10/) is `C:\Windows\System32\drivers\etc\hosts`
+
+You have to create a new entry on this file so the development machine understands that the custom domain (for instance `stellar.local`) points to itself.
 
 You need to have an entry similar to the following:
 
@@ -77,22 +92,24 @@ You need to have an entry similar to the following:
 127.0.0.1 localhost stellar.local mail.stellar.local pma.stellar.local
 ```
 
-#### 2. Change the your `.env` file to point to the new domain
+> Assuming that you'll use `stellar.local` as your custom environment
 
-In you `.env` add or change the following line:
+### 2. Change the `.env` file to point to the new domain
+
+Create or update the file `.env`, and add or change the following line:
 
 ```bash
 WORDPRESS_HOST=stellar.local
 ```
 
-#### 3. (Re)build your environment
+### 3. (Re)build your environment
 
 ```bash
-docker-compose down -v
-docker-compse up -d
+npm destroy
+npm start
 ```
 
-### Disable HTTPS
+## Disable HTTPS
 
 The SSL certificate used to "secure" the web server is NOT valid since it's created by an _invalid authority_. So if you want to work without SSL you just have to add the following line to your `.env` file:
 
@@ -102,7 +119,12 @@ WORDPRESS_DISABLE_HTTPS=yes
 
 And **rebuild** (destroy/recreate) your environment
 
-### Proxy remote media files
+```bash
+npm destroy
+npm start
+```
+
+## Proxy remote media files
 
 There are times where you have a published staging site with hundreds of media files already uploaded, and syncing them locally would take too much time or occupy too much space in your local machine.
 
@@ -119,6 +141,70 @@ WORDPRESS_REMOTE_URL=https://remote-site.com
 ```
 
 This will tell `nginx` to look for the file locally **first**, and if it's not present, then look for that file on the remote site and pass it to the user.
+
+For this you do **not** have to destroy the environment, just restart it:
+
+```bash
+npm stop
+npm start
+```
+
+## Creating a multisite
+
+If you want to use this machine for multiple projects using a multisite you have to do multiple things:
+
+### 1. Changes in the `.env` file
+
+- The port **has** to be the standard SSL port: `443`
+- You can select a custom domain but it can **not** be `localhost`
+- Have to set the `WORDPRESS_MULTISITE` flag to `1`
+
+```bash
+WORDPRESS_PORT_HTTPS=443
+WORDPRESS_HOST=stellar.local
+WORDPRESS_MULTISITE=1
+```
+
+### 2. Change the `hosts` file for **every** domain
+
+The file on your machine and not a file in the container (see above to find out how to find it).
+
+```bash
+# Docker Development
+127.0.0.1 stellar.local mail.stellar.local pma.stellar.local
+127.0.0.1 one.stellar.local
+127.0.0.1 two.stellar.local
+127.0.0.1 three.stellar.local
+127.0.0.1 four.stellar.local
+```
+
+### 3. (optional) Create network aliases
+
+This will fix the _health issue_ where RPC on `Tools > Site Health`
+
+Create a new `.yaml` file with the names of your sites:
+
+```yaml
+# docker-compose.stellar.yaml
+services:
+  webserver:
+    networks:
+      default:
+        aliases:
+          - one.stellar.local
+          - two.stellar.local
+          - three.stellar.local
+          - four.stellar.local
+```
+
+## 4. Create the environment with 2 docker files
+
+For muiltisite, you **have** to start the environment with `docker-compose` (npm start wont work)
+
+```bash
+npm destroy
+docker-compose -f docker-compose.yaml -f docker-compose.stellar.yaml up -d
+```
 
 ## Troubleshooting
 
