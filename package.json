@@ -11,7 +11,8 @@
     "composer": "docker-compose exec --user=33 wp composer",
     "log:install": "docker-compose logs wp-cli",
     "log:web": "docker-compose logs webserver",
-    "toc:create": "npx markdown-toc-gen insert README.md"
+    "toc:create": "npx markdown-toc-gen insert README.md",
+    "lint:md": "npx markdownlint README.md --fix"
   },
   "repository": {
     "type": "git",

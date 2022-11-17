@@ -9,7 +9,7 @@ Local WordPress development environment using only **Docker** and optionally Nod
 - [Features](#features)
 - [Installation/Setup](#installationsetup)
 - [Plugin and Theme Developmet](#plugin-and-theme-developmet)
-- [Destroy the environment](#destroy-the-environment)
+- [Destroy vs Stop](#destroy-vs-stop)
 - [Change `localhost` for a custom domain](#change-localhost-for-a-custom-domain)
   - [1. Change your `hosts` file](#1-change-your-hosts-file)
   - [2. Change the `.env` file to point to the new domain](#2-change-the-env-file-to-point-to-the-new-domain)
@@ -23,6 +23,8 @@ Local WordPress development environment using only **Docker** and optionally Nod
 - [4. Create the environment with 2 docker files](#4-create-the-environment-with-2-docker-files)
 - [Troubleshooting](#troubleshooting)
   - [Error connecting to port 8443 (or any conrfigured port)](#error-connecting-to-port-8443-or-any-conrfigured-port)
+  - ["Site Healt" says the I'm not ussing HTTPS](#site-healt-says-the-im-not-ussing-https)
+  - [REST API encounter an error](#rest-api-encounter-an-error)
 
 <!-- tocstop -->
 
@@ -38,6 +40,12 @@ Local WordPress development environment using only **Docker** and optionally Nod
 - You can change the MySQL connection credentials (see below)
 - You can use _proxy_ remote media files to avoid big sync processes (see below)
 - You can enable multisite
+
+For a list of available tasks/commands execute
+
+```bash
+npm run
+```
 
 ## Installation/Setup
 
@@ -62,19 +70,33 @@ After you startup then environment, you should have 2 new folders:
 
 If you destroy your environment, everything in this folders **will be kept**.
 
-## Destroy the environment
+## Destroy vs Stop
+
+If you want to stop the Docker Containers, you just have to issue
+
+```bash
+npm stop
+```
+
+This will bring down the services, but will preserve the data, including MySQL databases and the WordPress installation. So it's a perfect way to pause your work to resume on a later date.
+
+If you want to start from scratch, then you have to use the _destroy_ command:
 
 ```bash
 npm run destroy
 ```
 
-Content on `plgins/` and `themes/` will allways be **kept**
+This will delete the MySQL data, the WordPress installation, the webserver configuration, etc. This is a good option when you are having issues, you want to start a new project, or when you want to change the development "domain".
+
+Take into account that the content of `plugins/` and `themes/` will **never** be deleted, not even with the _destroy_ command
 
 ## Change `localhost` for a custom domain
 
-Thigs to note you start:
+If you are going to develop WP-JSON Api applications, or you are annoyed by _Site Health_ API notification. Is suggested that you change the domain of the development environment from "localhost" to a custom fake domain. This is also a requirement when you are going to use a _multisite_ installation (see below).
 
-- You _should_ use an **invalid** sufix like `.local` or `.devdomain` or `.localdomain` to avoid redirection in your browser
+2 Things to note before starting:
+
+- You _should_ use an **invalid** sufix like `.local` or `.devdomain` or `.localdomain` to avoid automatic redirections in your browser
 - You can **not change** the domain of a working environment, you have to destroy it first
 
 ### 1. Change your `hosts` file
@@ -218,3 +240,15 @@ docker-compose up
 ```
 
 Do **not** pass the `-v` option. We only need to restart the environment, not destoy it.
+
+### "Site Healt" says the I'm not ussing HTTPS
+
+This hapens on a multisite configuration, and is bacause the Site Creation form does not use HTTPS by default. The solution is to go to `My Sites (on the admin toolbar) > Network Admin > Sites` clic on `Edit` onder the problem site, and change `http` with `https`.
+
+### REST API encounter an error
+
+This happens because you are using `localhost` as the WordPress host and your development machine can not understand that `localhost` is actually a Docker container.
+
+The solution is to use a custom _domain_ option
+
+If you are using a multisite setup, then you have to do the "optional" _Network Aliases_ step.
