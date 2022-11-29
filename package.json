@@ -9,10 +9,14 @@
     "restart": "docker-compose down && docker-compose up -d",
     "bash": "docker-compose exec --user=33 wp bash",
     "composer": "docker-compose exec --user=33 wp composer",
+    "cli": "docker-compose run --rm --user=xfs wp-cli",
     "log:install": "docker-compose logs wp-cli",
     "log:web": "docker-compose logs webserver",
+    "log:wp": "docker-compose logs wp",
+    "log": "docker-compose logs -f",
     "toc:create": "npx markdown-toc-gen insert README.md",
-    "lint:md": "npx markdownlint README.md --fix"
+    "lint:md": "npx markdownlint README.md --fix",
+    "status": "docker-compose ps && docker-compose version"
   },
   "repository": {
     "type": "git",
