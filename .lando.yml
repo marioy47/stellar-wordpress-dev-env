@@ -1,0 +1,36 @@
+name: learndash
+recipe: wordpress
+config:
+  via: nginx
+  webroot: www
+  database: mariadb
+
+services:
+  # Install WordPress
+  appserver:
+    run:
+      - /app/wordpress-install.sh
+
+  # Add PhpMyAdmin in pma.learndash.lndo.site
+  pma:
+    type: phpmyadmin
+
+  # Add MailCatcher in mail.learndash.lndo.site
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver
+
+proxy:
+
+  # Enable Widlcards for multisite to work
+  appserver_nginx:
+    - "*.learndash.lndo.site"
+    - learndash.lndo.site
+
+  pma:
+    - pma.learndash.lndo.site
+
+  mailhog:
+    - mail.learndash.lndo.site
+
