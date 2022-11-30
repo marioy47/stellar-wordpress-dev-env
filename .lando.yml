@@ -9,7 +9,11 @@ services:
   # Install WordPress
   appserver:
     run:
-      - /app/wordpress-install.sh
+      - /app/lando/wordpress-install.sh
+    overrides:
+      volumes:
+        - ./plugins:/app/www/wp-content/plugins
+        - ./themes:/app/www/wp-content/themes
 
   # Add PhpMyAdmin in pma.learndash.lndo.site
   pma:
