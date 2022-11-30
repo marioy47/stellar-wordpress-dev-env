@@ -25,6 +25,10 @@ services:
     hogfrom:
       - appserver
 
+  redis:
+    type: redis
+    portforward: false
+
 proxy:
 
   # Enable Widlcards for multisite to work
