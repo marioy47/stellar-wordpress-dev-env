@@ -252,3 +252,20 @@ This happens because you are using `localhost` as the WordPress host and your de
 The solution is to use a custom _domain_ option
 
 If you are using a multisite setup, then you have to do the "optional" _Network Aliases_ step.
+
+## Using Lando
+
+If you have lando installed then instead if `npm start` use
+
+```bash
+lando start
+```
+
+Some differences, between using Lando and pure Docker are:
+
+- You'll get a `www` directory with the WordPress installation
+- You can use `lando ssh` to get into the _Appserver_
+- The URL's will change:
+  - WordPress: <https://stellar.lndo.site>
+  - PhpMyAdmin: <https://pma.stellar.lndo.site>
+  - MailHog: <https://mail.stellar.lndo.site>

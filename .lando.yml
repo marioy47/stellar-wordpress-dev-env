@@ -1,4 +1,4 @@
-name: learndash
+name: stellar
 recipe: wordpress
 config:
   via: nginx
@@ -15,11 +15,11 @@ services:
         - ./plugins:/app/www/wp-content/plugins
         - ./themes:/app/www/wp-content/themes
 
-  # Add PhpMyAdmin in pma.learndash.lndo.site
+  # Add PhpMyAdmin in pma.stellar.lndo.site
   pma:
     type: phpmyadmin
 
-  # Add MailCatcher in mail.learndash.lndo.site
+  # Add MailCatcher in mail.stellar.lndo.site
   mailhog:
     type: mailhog
     hogfrom:
@@ -33,12 +33,12 @@ proxy:
 
   # Enable Widlcards for multisite to work
   appserver_nginx:
-    - "*.learndash.lndo.site"
-    - learndash.lndo.site
+    - "*.stellar.lndo.site"
+    - stellar.lndo.site
 
   pma:
-    - pma.learndash.lndo.site
+    - pma.stellar.lndo.site
 
   mailhog:
-    - mail.learndash.lndo.site
+    - mail.stellar.lndo.site
 
