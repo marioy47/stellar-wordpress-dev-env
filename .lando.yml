@@ -4,8 +4,10 @@ config:
   via: nginx
   webroot: www
   database: mariadb
+  xdebug: true
 
 services:
+
   # Install WordPress
   appserver:
     run:
@@ -25,6 +27,7 @@ services:
     hogfrom:
       - appserver
 
+  # Add a Cache database
   redis:
     type: redis
     portforward: false
@@ -42,3 +45,10 @@ proxy:
   mailhog:
     - mail.stellar.lndo.site
 
+
+tooling:
+
+  # Change the wp command to account for the new webroot
+  wp:
+    service: appserver
+    cmd: wp --path=/app/www

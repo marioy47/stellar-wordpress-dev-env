@@ -7,9 +7,9 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/var/www/html/wp-content/plugins": "${workspaceFolder}/plugins",
-                "/var/www/html/wp-content/themes": "${workspaceFolder}/themes",
-                "/var/www/html/wp-content/public": "${workspaceFolder}/public"
+                "/app/www/wp-content/plugins": "${workspaceFolder}/plugins",
+                "/app/www/wp-content/themes": "${workspaceFolder}/themes",
+                "/app/www/wp-content/www": "${workspaceFolder}/www"
             }
         },
         {
