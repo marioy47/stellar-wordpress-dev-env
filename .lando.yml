@@ -19,10 +19,12 @@ services:
 
   # Add PhpMyAdmin in pma.stellar.lndo.site
   pma:
+    ssl: true
     type: phpmyadmin
 
   # Add MailCatcher in mail.stellar.lndo.site
   mailhog:
+    ssl: true
     type: mailhog
     hogfrom:
       - appserver
@@ -40,11 +42,10 @@ proxy:
     - stellar.lndo.site
 
   pma:
-    - pma.stellar.lndo.site
+    - stellar-pma.lndo.site
 
   mailhog:
-    - mail.stellar.lndo.site
-
+    - stellar-mail.lndo.site
 
 tooling:
 
