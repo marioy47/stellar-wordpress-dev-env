@@ -19,5 +19,6 @@ fi
 wp --path=${LANDO_WEBROOT} core multisite-install --subdomains --title="${LANDO_APP_PROJECT}" --admin_user=admin --admin_password=password --admin_email=admin@example.com --skip-email --url="$URL"
 wp --path=${LANDO_WEBROOT} plugin install redis-cache --activate
 wp --path=${LANDO_WEBROOT} redis enable
+wp --path=${LANDO_WEBROOT} rewrite structure '/%year%/%monthnum%/%postname%/' --hard
 
 echo "Go to $URL/wp-admin/ with User admin and password password"

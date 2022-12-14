@@ -1,8 +1,8 @@
-name: stellar
+name: stellarwp
 recipe: wordpress
 config:
   via: nginx
-  webroot: www
+  webroot: wp-www
   database: mariadb
   xdebug: true
 
@@ -14,15 +14,16 @@ services:
       - /app/lando/wordpress-install.sh
     overrides:
       volumes:
-        - ./plugins:/app/www/wp-content/plugins
-        - ./themes:/app/www/wp-content/themes
+        # Must match `webroot` above
+        - ./plugins:/app/wp-www/wp-content/plugins
+        - ./themes:/app/wp-www/wp-content/themes
 
-  # Add PhpMyAdmin in pma.stellar.lndo.site
+  # Add PhpMyAdmin in pma.stellarwp.lndo.site
   pma:
     ssl: true
     type: phpmyadmin
 
-  # Add MailCatcher in mail.stellar.lndo.site
+  # Add MailCatcher in mail.stellarwp.lndo.site
   mailhog:
     ssl: true
     type: mailhog
@@ -38,14 +39,14 @@ proxy:
 
   # Enable Widlcards for multisite to work
   appserver_nginx:
-    - "*.stellar.lndo.site"
-    - stellar.lndo.site
+    - "*.stellarwp.lndo.site"
+    - stellarwp.lndo.site
 
   pma:
-    - stellar-pma.lndo.site
+    - stellarwp-pma.lndo.site
 
   mailhog:
-    - stellar-mail.lndo.site
+    - stellarwp-mail.lndo.site
 
 tooling:
 

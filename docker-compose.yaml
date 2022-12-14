@@ -139,6 +139,7 @@ services:
         wp core $${TYPE} --path=/var/www/html --title=StellarDEV --admin_user=$${WORDPRESS_ADMIN_USER} --admin_password=$${WORDPRESS_ADMIN_PASS} --admin_email=admin@example.com --skip-email --url="$$URL"
         wp plugin install redis-cache --activate
         wp redis enable
+        wp rewrite structure '/%year%/%monthnum%/%postname%/' --hard
         echo "Go to $$URL/wp-admin/ with User $${WORDPRESS_ADMIN_USER} and password $${WORDPRESS_ADMIN_PASS}"
 
   # Redis cache
