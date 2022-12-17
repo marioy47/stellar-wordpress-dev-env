@@ -5,7 +5,7 @@
   "scripts": {
     "start": "docker-compose up -d",
     "stop": "docker-compose down",
-    "destroy": "docker-compose down -v && rm -rf wp-www",
+    "destroy": "docker-compose down -v",
     "restart": "docker-compose down && docker-compose up -d",
     "ssh": "docker-compose exec --user=33 wp bash",
     "composer": "docker-compose exec --user=33 wp composer",
