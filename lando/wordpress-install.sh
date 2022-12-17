@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Script to install WordPress in a multisite configuration
 
 URL="https://${LANDO_APP_NAME}.lndo.site"
 
@@ -12,6 +13,12 @@ if [ ! -f ${LANDO_WEBROOT}/wp-config.php ]; then
     wp config create --path=${LANDO_WEBROOT} --dbhost=database.${LANDO_APP_NAME}.internal --dbname=wordpress --dbuser=wordpress --dbpass=wordpress --extra-php <<PHP
 /* Lando custom config */
 define( 'WP_DEBUG', true );
+define( 'SCRIPT_DEBUG', true);
+define( 'LEARNDASH_DEBUG', true );
+define( 'LEARNDASH_SCRIPT_DEBUG', true );
+define( 'LEARNDASH_BUILDER_DEBUG', true );
+define( 'WP_DEBUG_DISPLAY', true );
+define( 'WP_DEBUG_LOG', '/tmp/wordpress/wordpress.log' );
 define( 'WP_REDIS_HOST', 'redis.${LANDO_APP_NAME}.internal' );
 PHP
 fi
