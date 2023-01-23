@@ -53,4 +53,5 @@ tooling:
   # Change the wp command to account for the new webroot
   wp:
     service: appserver
-    cmd: wp --path=/app/www
+    cmd: wp
+    dir: /var/wp-www
